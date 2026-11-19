@@ -5,8 +5,11 @@
     <!-- Permisos para notificaciones y biometría -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <application
+        android:usesCleartextTraffic="true"
         android:name=".WimApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"

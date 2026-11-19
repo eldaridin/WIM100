@@ -53,6 +53,15 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.logging)
+
+    // Pruebas unitarias
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+2
+
 
     // Persistencia local: Room SQlite
     implementation(libs.androidx.room.runtime)

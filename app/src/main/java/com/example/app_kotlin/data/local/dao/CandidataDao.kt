@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import com.example.app_kotlin.model.Candidata
 import com.example.app_kotlin.model.EstadoCandidatura
 import kotlinx.coroutines.flow.Flow
@@ -34,4 +35,16 @@ interface CandidataDao {
 
     @Query("SELECT COUNT(*) FROM candidatas")
     suspend fun contarCandidatas(): Int
+
+    @Upsert
+    suspend fun upsert(candidata: Candidata)
+
+    @Upsert
+    suspend fun upsertTodas(candidatas: List<Candidata>)
+
+    @Query("DELETE FROM candidatas WHERE id = :id")
+    suspend fun eliminar(id: Long)
+
+    @Query("DELETE FROM candidatas WHERE id NOT IN (:ids)")
+    suspend fun eliminarNoIncluidas(ids: List<Long>)
 }
