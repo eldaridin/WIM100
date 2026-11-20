@@ -36,6 +36,10 @@ interface CandidataDao {
     @Query("SELECT COUNT(*) FROM candidatas")
     suspend fun contarCandidatas(): Int
 
+    /** Lista puntual (no Flow). Se usa al sincronizar para conservar el cvUri local. */
+    @Query("SELECT * FROM candidatas")
+    suspend fun obtenerTodasLista(): List<Candidata>
+
     @Upsert
     suspend fun upsert(candidata: Candidata)
 

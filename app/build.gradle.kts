@@ -60,7 +60,7 @@ dependencies {
     // Pruebas unitarias
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
-2
+
 
 
     // Persistencia local: Room SQlite
