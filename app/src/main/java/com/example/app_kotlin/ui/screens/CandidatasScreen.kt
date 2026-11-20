@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedFilterChip
@@ -57,7 +59,8 @@ fun CandidatasScreen(
     onBusquedaChange: (String) -> Unit,
     onFiltroEstadoChange: (EstadoCandidatura?) -> Unit,
     onCandidataClick: (Long) -> Unit,
-    onNuevaCandidataClick: () -> Unit
+    onNuevaCandidataClick: () -> Unit,
+    onRefrescarClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -73,6 +76,15 @@ fun CandidatasScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onRefrescarClick, enabled = !state.actualizando) {
+                        if (state.actualizando) {
+                            CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Default.Refresh, contentDescription = "Actualizar desde el servidor")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -96,6 +108,16 @@ fun CandidatasScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            // Si el servidor no responde, se avisa pero se sigue mostrando la copia local
+            state.errorRed?.let { error ->
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
+
             // Buscador con botón para limpiar
             OutlinedTextField(
                 value = state.busquedaTexto,
