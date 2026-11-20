@@ -11,18 +11,13 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             SesionViewModel(
+                authRepository = wimApplication().container.authRepository,
                 historialRepository = wimApplication().container.historialRepository
             )
         }
 
         initializer {
             CandidatasViewModel(
-                candidataRepository = wimApplication().container.candidataRepository
-            )
-        }
-
-        initializer {
-            CandidataFormViewModel(
                 candidataRepository = wimApplication().container.candidataRepository
             )
         }
@@ -36,6 +31,17 @@ object AppViewModelProvider {
         initializer {
             HistorialViewModel(
                 historialRepository = wimApplication().container.historialRepository
+            )
+        }
+    }
+
+    /** candidataId = null: registrar una nueva; con valor: editar esa candidata. */
+    fun formViewModelFactory(candidataId: Long?) = viewModelFactory {
+        initializer {
+            CandidataFormViewModel(
+                candidataId = candidataId,
+                candidataRepository = wimApplication().container.candidataRepository,
+                randomUserRepository = wimApplication().container.randomUserRepository
             )
         }
     }
