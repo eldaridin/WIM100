@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.Email
@@ -38,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -71,6 +73,7 @@ fun CandidataFormScreen(
     onResumenExpChange: (String) -> Unit,
     onLinkedinUrlChange: (String) -> Unit,
     onArchivoPdfSeleccionado: (Uri?) -> Unit,
+    onGenerarNombreClick: () -> Unit,
     onGuardarClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -86,7 +89,12 @@ fun CandidataFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registro de Postulación", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        text = if (state.esEdicion) "Editar Postulación" else "Registro de Postulación",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
@@ -116,6 +124,13 @@ fun CandidataFormScreen(
                 icono = Icons.Default.Person,
                 placeholder = "Ej: Valentina Silva M."
             )
+
+            // API externa (randomuser.me): solo aporta un nombre ficticio
+            TextButton(onClick = onGenerarNombreClick) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Generar nombre ficticio (API externa)")
+            }
 
             CampoValidado(
                 campo = state.correo,
@@ -217,7 +232,7 @@ fun CandidataFormScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = state.infoArchivoPdf?.nombre ?: "Sin archivo PDF adjunto",
+                                text = state.infoArchivoPdf?.nombre ?: state.cvNombreActual ?: "Sin archivo PDF adjunto",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold
                             )
@@ -238,7 +253,9 @@ fun CandidataFormScreen(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (state.infoArchivoPdf == null) "Adjuntar Currículum (PDF)" else "Reemplazar PDF")
+                        Text(
+                            if (state.infoArchivoPdf == null && state.cvNombreActual == null) "Adjuntar Currículum (PDF)" else "Reemplazar PDF"
+                        )
                     }
 
                     state.errorCvPdf?.let { err ->
@@ -250,6 +267,14 @@ fun CandidataFormScreen(
                         )
                     }
                 }
+            }
+
+            state.errorGeneral?.let { error ->
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -269,7 +294,11 @@ fun CandidataFormScreen(
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (state.guardando) "Guardando..." else "GUARDAR POSTULACIÓN",
+                    text = when {
+                        state.guardando -> "Guardando..."
+                        state.esEdicion -> "GUARDAR CAMBIOS"
+                        else -> "GUARDAR POSTULACIÓN"
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

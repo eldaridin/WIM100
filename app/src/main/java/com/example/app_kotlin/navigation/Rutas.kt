@@ -14,11 +14,13 @@ object Rutas {
     const val HISTORIAL = "historial"
     const val PERFIL = "perfil"
     const val NUEVA_CANDIDATA = "nueva-candidata"
+    const val EDITAR_CANDIDATA = "editar-candidata/{candidataId}"
     const val DETALLE_CANDIDATA = "candidata/{candidataId}"
     const val EVALUAR = "evaluar/{candidataId}"
 
     fun detalleCandidata(id: Long) = "candidata/$id"
     fun evaluar(id: Long) = "evaluar/$id"
+    fun editarCandidata(id: Long) = "editar-candidata/$id"
 }
 
 enum class DestinoPrincipal(
