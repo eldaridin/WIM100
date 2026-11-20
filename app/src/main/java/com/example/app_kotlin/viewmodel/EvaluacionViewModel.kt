@@ -145,6 +145,10 @@ class EvaluacionViewModel(
                     mapaObservaciones = st.mapaObservaciones
                 )
 
+                // El estado se calculó en Room; se envía al microservicio (PATCH /estado).
+                // Si el servidor no responde, la evaluación igual queda guardada.
+                runCatching { candidataRepository.sincronizarEstado(candidataId) }
+
                 // Notificación local nativa
                 st.candidata?.let { candidata ->
                     notificador.notificarEvaluacionRegistrada(candidata.nombre, st.puntajeTotalCalculado)
