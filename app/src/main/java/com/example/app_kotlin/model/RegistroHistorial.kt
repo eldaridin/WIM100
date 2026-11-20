@@ -21,4 +21,6 @@ object Acciones {
     const val EVALUACION_REGISTRADA = "Evaluación registrada"
     const val EVALUACION_DUPLICADA_INTENTO = "Intento de evaluación duplicada"
     const val CANDIDATURA_RESUELTA = "Candidatura resuelta"
+    const val EDICION_CANDIDATA = "Edición de candidata"
+    const val ELIMINACION_CANDIDATA = "Eliminación de candidata"
 }
