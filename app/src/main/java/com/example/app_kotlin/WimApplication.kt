@@ -17,7 +17,7 @@ class WimApplication : Application() {
         container = AppContainer(this)
 
         CoroutineScope(Dispatchers.IO).launch {
-            DatosSemilla.poblarSiVacia(container.database, applicationContext)
+            DatosSemilla.poblarSiVacia(container)
         }
     }
 }
