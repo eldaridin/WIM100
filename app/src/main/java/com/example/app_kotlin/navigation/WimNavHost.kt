@@ -51,18 +51,15 @@ fun WimNavHost(
         composable(Rutas.LOGIN) {
             LoginScreen(
                 state = sesionState,
-                onNombreChange = sesionViewModel::onNombreChange,
-                onRolSelected = sesionViewModel::onRolSelected,
-                onLoginClick = {
-                    sesionViewModel.iniciarSesion {
+                onUsuarioChange = sesionViewModel::onUsuarioChange,
+                onPasswordChange = sesionViewModel::onPasswordChange,
+                onValidar = sesionViewModel::validar,
+                onLoginClick = { metodo ->
+                    // Navega solo cuando el servidor acepta las credenciales
+                    sesionViewModel.iniciarSesion(metodo) {
                         navController.navigate(Rutas.CANDIDATAS) {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
-                    }
-                },
-                onLoginExitoso = {
-                    navController.navigate(Rutas.CANDIDATAS) {
-                        popUpTo(Rutas.LOGIN) { inclusive = true }
                     }
                 }
             )
@@ -81,32 +78,28 @@ fun WimNavHost(
                 },
                 onNuevaCandidataClick = {
                     navController.navigate(Rutas.NUEVA_CANDIDATA)
-                }
+                },
+                onRefrescarClick = viewModel::refrescar
             )
         }
 
         composable(Rutas.NUEVA_CANDIDATA) {
-            val viewModel: CandidataFormViewModel = viewModel(factory = AppViewModelProvider.Factory)
-            val state by viewModel.uiState.collectAsState()
-            val context = androidx.compose.ui.platform.LocalContext.current
-
-            CandidataFormScreen(
-                state = state,
-                onNombreChange = viewModel::onNombreChange,
-                onCorreoChange = viewModel::onCorreoChange,
-                onTelefonoChange = viewModel::onTelefonoChange,
-                onAreaChange = viewModel::onAreaChange,
-                onAnnosExpChange = viewModel::onAnnosExpChange,
-                onResumenExpChange = viewModel::onResumenExpChange,
-                onLinkedinUrlChange = viewModel::onLinkedinUrlChange,
-                onArchivoPdfSeleccionado = { uri -> viewModel.onArchivoPdfSeleccionado(context, uri) },
-                onGuardarClick = {
-                    viewModel.guardarCandidata(context) {
-                        navController.popBackStack()
-                    }
-                },
-                onBackClick = { navController.popBackStack() }
+            val viewModel: CandidataFormViewModel = viewModel(
+                factory = AppViewModelProvider.formViewModelFactory(null)
             )
+            FormularioCandidata(viewModel = viewModel, onVolver = { navController.popBackStack() })
+        }
+
+        // Editar reutiliza la misma pantalla del formulario
+        composable(
+            route = Rutas.EDITAR_CANDIDATA,
+            arguments = listOf(navArgument("candidataId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val candidataId = backStackEntry.arguments?.getLong("candidataId") ?: 0L
+            val viewModel: CandidataFormViewModel = viewModel(
+                factory = AppViewModelProvider.formViewModelFactory(candidataId)
+            )
+            FormularioCandidata(viewModel = viewModel, onVolver = { navController.popBackStack() })
         }
 
         composable(
@@ -125,6 +118,8 @@ fun WimNavHost(
                     navController.navigate(Rutas.evaluar(candidataId))
                 },
                 onResolverClick = viewModel::resolverCandidatura,
+                onEditarClick = { navController.navigate(Rutas.editarCandidata(candidataId)) },
+                onEliminarClick = viewModel::eliminarCandidata,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -187,4 +182,28 @@ fun WimNavHost(
             )
         }
     }
+}
+
+@Composable
+private fun FormularioCandidata(
+    viewModel: CandidataFormViewModel,
+    onVolver: () -> Unit
+) {
+    val state by viewModel.uiState.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    CandidataFormScreen(
+        state = state,
+        onNombreChange = viewModel::onNombreChange,
+        onCorreoChange = viewModel::onCorreoChange,
+        onTelefonoChange = viewModel::onTelefonoChange,
+        onAreaChange = viewModel::onAreaChange,
+        onAnnosExpChange = viewModel::onAnnosExpChange,
+        onResumenExpChange = viewModel::onResumenExpChange,
+        onLinkedinUrlChange = viewModel::onLinkedinUrlChange,
+        onArchivoPdfSeleccionado = { uri -> viewModel.onArchivoPdfSeleccionado(context, uri) },
+        onGenerarNombreClick = viewModel::generarNombreFicticio,
+        onGuardarClick = { viewModel.guardarCandidata(context) { onVolver() } },
+        onBackClick = onVolver
+    )
 }

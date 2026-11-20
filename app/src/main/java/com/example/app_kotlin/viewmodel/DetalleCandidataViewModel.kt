@@ -2,6 +2,7 @@ package com.example.app_kotlin.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.app_kotlin.data.remote.mensajeAmigable
 import com.example.app_kotlin.data.repository.CandidataRepository
 import com.example.app_kotlin.data.repository.EvaluacionRepository
 import com.example.app_kotlin.data.repository.HistorialRepository
@@ -30,7 +31,8 @@ data class DetalleCandidataUiState(
     val historial: List<RegistroHistorial> = emptyList(),
     val cargando: Boolean = true,
     val mensajeExitoRespuesta: String? = null,
-    val errorGeneral: String? = null
+    val errorGeneral: String? = null,
+    val eliminada: Boolean = false
 )
 
 class DetalleCandidataViewModel(
@@ -59,14 +61,16 @@ class DetalleCandidataViewModel(
                     EvaluacionConDetalle(ev, detalles)
                 }
 
-                DetalleCandidataUiState(
-                    candidata = candidata,
-                    evaluaciones = evConDetalles,
-                    historial = listaHistorial,
-                    cargando = false
-                )
-            }.collect { estado ->
-                _uiState.value = estado
+                Triple(candidata, evConDetalles, listaHistorial)
+            }.collect { (candidata, evaluaciones, historial) ->
+                _uiState.update {
+                    it.copy(
+                        candidata = candidata,
+                        evaluaciones = evaluaciones,
+                        historial = historial,
+                        cargando = false
+                    )
+                }
             }
         }
     }
@@ -82,10 +86,27 @@ class DetalleCandidataViewModel(
                     usuarioDireccion = Sesion.usuarioActivo
                 )
                 _uiState.update {
-                    it.copy(mensajeExitoRespuesta = "Postulación marcada como: ${nuevoEstado.titulo}")
+                    it.copy(
+                        mensajeExitoRespuesta = "Postulación marcada como: ${nuevoEstado.titulo}",
+                        errorGeneral = null
+                    )
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorGeneral = "Error al resolver la postulación: ${e.localizedMessage}") }
+                _uiState.update { it.copy(errorGeneral = "Error al resolver la postulación: ${e.mensajeAmigable()}") }
+            }
+        }
+    }
+
+    /** DELETE remoto + local. Solo la evaluadora puede eliminar. */
+    fun eliminarCandidata() {
+        if (!Sesion.estaAutenticado || Sesion.rolActivo != Rol.EVALUADORA) return
+
+        viewModelScope.launch {
+            try {
+                candidataRepository.eliminarCandidata(candidataId, Sesion.usuarioActivo)
+                _uiState.update { it.copy(eliminada = true) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorGeneral = "No se pudo eliminar: ${e.mensajeAmigable()}") }
             }
         }
     }

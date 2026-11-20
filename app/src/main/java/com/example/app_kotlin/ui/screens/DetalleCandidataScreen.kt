@@ -19,11 +19,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,9 +39,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,10 +72,18 @@ fun DetalleCandidataScreen(
     state: DetalleCandidataUiState,
     onEvaluarClick: () -> Unit,
     onResolverClick: (EstadoCandidatura) -> Unit,
+    onEditarClick: () -> Unit,
+    onEliminarClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     var mostrarVisorPdf by remember { mutableStateOf(false) }
+    var confirmarEliminar by remember { mutableStateOf(false) }
+
+    // Cuando el servidor confirma la eliminación se vuelve a la lista
+    LaunchedEffect(state.eliminada) {
+        if (state.eliminada) onBackClick()
+    }
 
     Scaffold(
         topBar = {
@@ -82,6 +95,15 @@ fun DetalleCandidataScreen(
                     }
                 },
                 actions = {
+                    // Editar y eliminar: solo para EVALUADORA
+                    if (state.candidata != null && Sesion.rolActivo == Rol.EVALUADORA) {
+                        IconButton(onClick = onEditarClick) {
+                            Icon(Icons.Default.Edit, contentDescription = "Editar candidatura")
+                        }
+                        IconButton(onClick = { confirmarEliminar = true }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Eliminar candidatura")
+                        }
+                    }
                     IconButton(onClick = {
                         state.candidata?.let { c ->
                             IntentsHelper.compartirTexto(
@@ -118,6 +140,13 @@ fun DetalleCandidataScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                state.errorGeneral?.let { error ->
+                    Text(text = error, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                }
+                state.mensajeExitoRespuesta?.let { mensaje ->
+                    Text(text = mensaje, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                }
+
                 GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -265,6 +294,23 @@ fun DetalleCandidataScreen(
                 }
             }
         }
+    }
+
+    if (confirmarEliminar) {
+        AlertDialog(
+            onDismissRequest = { confirmarEliminar = false },
+            title = { Text("¿Eliminar candidatura?") },
+            text = { Text("Se eliminará del servidor junto con sus evaluaciones locales.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarEliminar = false
+                    onEliminarClick()
+                }) { Text("Eliminar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarEliminar = false }) { Text("Cancelar") }
+            }
+        )
     }
 
     if (mostrarVisorPdf && state.candidata?.cvUri != null) {
