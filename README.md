@@ -132,7 +132,7 @@ En Windows: `.\gradlew.bat testDebugUnitTest`. Para medir la cobertura, en Andro
 
 Cubren: `CandidataRepository`, `AuthRepository`, `RandomUserRepository`, `SesionViewModel`, `CandidatasViewModel`, `CandidataFormViewModel`, validadores, mapeos, mensajes de error y `CalculadoraPuntaje`.
 
-![Cobertura de pruebas](docs/captura-cobertura.png)
+![Cobertura de pruebas](docs/cap3.png)
 
 ## APK firmado
 
@@ -148,8 +148,8 @@ El APK queda en `app/build/outputs/apk/release/app-release.apk`. Para verificar 
 apksigner verify --print-certs app-release.apk
 ```
 
-![APK firmado](docs/captura-apk-firmado.png)
-![Keystore](docs/captura-keystore.png)
+![APK firmado](docs/cap2.png)
+![Keystore](docs/cap1.png)
 
 > **Aviso de seguridad:** el `.jks` y sus contraseñas se incluyen en el repositorio solo porque la evaluación lo exige. En un proyecto real nunca se suben a un repositorio público.
 
