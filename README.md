@@ -3,7 +3,7 @@
 Aplicación móvil para **evaluar candidaturas técnicas** del programa WIM 100 (ciberseguridad). Las evaluadoras registran y puntúan postulantes según una matriz de criterios, y Dirección revisa el ranking y resuelve cada postulación. Los datos de los postulantes viven en un **backend propio (Spring Boot + MySQL)** y la app guarda una copia local con Room.
 
 - **Asignatura:** DSY1105 · DuocUC, Escuela de Informática y Telecomunicaciones
-- **Integrantes:** [Nombre y apellido integrante 1] · [Nombre y apellido integrante 2]
+- **Integrantes:** Kevin Carazas · Dario Rojas
 - **Repositorio de la app:** https://github.com/eldaridin/WIM100
 - **Repositorio del backend:** https://github.com/eldaridin/WIM100_Backend
 
